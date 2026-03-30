@@ -1,9 +1,9 @@
 ---
 name: project-init
-description: Use this skill only for first-time initialization of a software project. It creates persistent project state under ~/.codex-state/<project-key>/, stores the durable primary planning document at ~/.codex-state/<project-key>/plan/plan.md, requires later write-plan or writing-plans outputs to be written under ~/.codex-state/<project-key>/plan/ as xxx_plan.md files instead of inside the repository, gathers the user's intended development goals before finalizing plan.md and feature_list.json, prefers Chinese for user-facing outputs unless the user explicitly requests another language, and creates or updates only the minimum required initialization files. It should also ensure AGENTS.md is git-ignored when appropriate. Do not use this skill for normal implementation work or routine bugfixes. After initialization, routine development should read the persistent state and use using-superpowers for one-feature-at-a-time execution.
+description: Use this skill only for first-time initialization of a software project. It creates persistent project state under ~/.codex-state/<project-key>/, stores the durable primary planning document at ~/.codex-state/<project-key>/plan/plan.md, requires later write-plan or writing-plans outputs to be written under ~/.codex-state/<project-key>/plan/ as feature- or topic-specific *_plan.md files instead of inside the repository, gathers the user's intended development goals before finalizing plan.md and feature_list.json, prefers Chinese for user-facing outputs unless the user explicitly requests another language, and creates or updates only the minimum required initialization files. It should also ensure AGENTS.md is git-ignored when appropriate. Do not use this skill for normal implementation work or routine bugfixes. After initialization, routine development should read the persistent state and use using-superpowers for one-feature-at-a-time execution.
 ---
 
-# Project Init v5
+# Project Init v5.2
 
 ## Purpose
 
@@ -14,15 +14,16 @@ Its responsibilities are:
 1. detect the current project root
 2. derive a stable project key
 3. create persistent project state under `~/.codex-state/<project-key>/`
-4. store the durable primary planning document at `~/.codex-state/<project-key>/plan/plan.md`
-5. reserve `~/.codex-state/<project-key>/plan/*.md` for future planning artifacts such as `xxx_plan.md`
+4. store the durable baseline planning document at `~/.codex-state/<project-key>/plan/plan.md`
+5. reserve `~/.codex-state/<project-key>/plan/*.md` for future feature- or topic-specific planning artifacts
 6. inspect the repository or empty project folder
 7. gather the user's intended development goals before finalizing the plan
 8. write an initial project plan
-9. create an initial task backlog
-10. create or update only the **minimum required initialization guidance** in the project root so future threads know how to continue
+9. write an initial task backlog
+10. create or update only the **minimum required initialization guidance** in the project root
 11. set the default user-facing workflow language to Chinese unless the user explicitly requests another language
 12. ensure local-only workflow files such as `AGENTS.md` are git-ignored when appropriate
+13. create a lightweight durable project-knowledge entrypoint so later threads can reuse core project understanding
 
 This skill does **not** perform routine implementation and must not turn initialization into real feature development.
 
@@ -30,7 +31,7 @@ After initialization, normal development work should use `using-superpowers`, no
 
 ---
 
-## Hard safety and scope boundary for the first thread
+## Hard Safety And Scope Boundary
 
 On the first initialization thread, do **not** modify arbitrary project files.
 
@@ -57,7 +58,7 @@ This is a hard rule.
 
 ---
 
-## Language rule
+## Language Rule
 
 This skill must set up the future workflow so that **user-facing communication is in Chinese by default**.
 
@@ -71,7 +72,7 @@ Rules:
 
 ---
 
-## When to use
+## When To Use
 
 Use this skill when **all or most** of the following are true:
 
@@ -82,17 +83,6 @@ Use this skill when **all or most** of the following are true:
 - the user wants future threads to read durable state before doing implementation
 - the project may be empty or only partially scaffolded
 - the user wants to define development goals before creating a backlog
-
-Typical user intents:
-
-- "Initialize this repo for long-running Codex work"
-- "Set up project state and bootstrap future-thread workflow"
-- "Create the initial plan and task backlog for this project"
-- "Prepare this folder for one-feature-at-a-time development"
-
----
-
-## Do not use when
 
 Do **not** use this skill when:
 
@@ -106,26 +96,28 @@ If persistent state exists and is healthy, use the normal workflow instead of re
 
 ---
 
-## High-level workflow
+## High-Level Workflow
 
 When invoked, perform this sequence:
 
 1. detect the project root
 2. derive the project key
 3. create the persistent state directory and baseline files
-4. create the project-scoped plan directory and plan file
-5. inspect the repository or empty folder
-6. gather or confirm the user's development goals
-7. write `plan.md`
-8. write `feature_list.json`
-9. write or update `progress.md`
-10. create or minimally update project-root `AGENTS.md`
-11. create or minimally update `.gitignore` when appropriate
-12. validate outputs and report results
+4. inspect the repository or empty folder
+5. gather or confirm the user's development goals
+6. choose `knowledge_mode`
+7. write `state.json`
+8. write `plan.md`
+9. write `feature_list.json`
+10. write `project_knowledge/overview.md`
+11. write or update `progress.md`
+12. create or minimally update project-root `AGENTS.md`
+13. create or minimally update `.gitignore` when appropriate
+14. validate outputs and report results
 
 ---
 
-## Step 1: Detect project root
+## Step 1: Detect Project Root
 
 Determine the project root.
 
@@ -141,7 +133,7 @@ Record whether this is a git repository as `IS_GIT_REPO`.
 
 ---
 
-## Step 2: Derive project key
+## Step 2: Derive Project Key
 
 Derive a stable `project-key`.
 
@@ -160,31 +152,23 @@ Record the result as `PROJECT_KEY`.
 
 ---
 
-## Step 3: Create persistent state directory and baseline files
+## Step 3: Create Persistent State Directory And Baseline Files
 
 Create:
 
-`~/.codex-state/<project-key>/`
-
-Record this path as `STATE_DIR`.
-
-Create:
-
-`~/.codex-state/<project-key>/plan/`
-
-Record this path as `PLAN_DIR`.
-
-Record the durable primary plan file path as `PLAN_PATH`, which must be:
-
-`~/.codex-state/<project-key>/plan/plan.md`
+- `STATE_DIR = ~/.codex-state/<project-key>/`
+- `PLAN_DIR = ~/.codex-state/<project-key>/plan/`
+- `PLAN_PATH = ~/.codex-state/<project-key>/plan/plan.md`
 
 Important:
 
 - `PLAN_DIR` is project-scoped and belongs only to the current `PROJECT_KEY`
-- `PLAN_PATH` is the durable primary plan file for the project
-- future planning artifacts created by `write-plan` or `writing-plans` must also live inside `PLAN_DIR`
-- additional plan artifacts should use descriptive filenames ending in `_plan.md`, such as `auth-flow_plan.md` or `phase1-api_plan.md`
-- the `xxx` portion in `xxx_plan.md` should be a short topic slug using lowercase letters, digits, and hyphens where practical
+- `PLAN_PATH` is the durable baseline plan file created during initialization
+- future planning artifacts created by `using-superpowers`, `write-plan`, or `writing-plans` must live inside `PLAN_DIR`
+- future planning artifacts must use descriptive filenames ending in `_plan.md`
+- when the current feature can be identified from `feature_list.json`, prefer a filename derived from that feature's id or title slug, such as `f-003-auth-flow_plan.md` or `auth-flow_plan.md`
+- when revisiting the same feature or topic, reuse the existing matching `*_plan.md`
+- unless the user explicitly asks to revise `plan.md`, do **not** modify an existing `PLAN_PATH` during later routine planning
 - do not write plan artifacts into repository paths such as `docs/superpowers/plans/` unless the user explicitly asks for in-repo plan files
 
 Ensure the following files exist inside `STATE_DIR`:
@@ -192,6 +176,11 @@ Ensure the following files exist inside `STATE_DIR`:
 - `state.json`
 - `feature_list.json`
 - `progress.md`
+
+Ensure the following directory and file exist inside `STATE_DIR`:
+
+- `project_knowledge/`
+- `project_knowledge/overview.md`
 
 Ensure the following file exists at `PLAN_PATH`:
 
@@ -201,11 +190,9 @@ If they do not exist, create them.
 
 If they already exist, read them first and preserve useful information.
 
-At this stage, it is acceptable to create placeholder or draft content before finalization.
-
 ---
 
-## Step 4: Inspect repository or empty folder
+## Step 4: Inspect Repository Or Empty Folder
 
 Inspect the project folder before planning.
 
@@ -239,7 +226,7 @@ Do not hallucinate details.
 
 ---
 
-## Step 5: Gather and confirm the user's goals before finalizing plan.md and feature_list.json
+## Step 5: Gather And Confirm The User's Goals Before Finalizing plan.md And feature_list.json
 
 This is a required step.
 
@@ -253,23 +240,35 @@ At minimum, obtain or confirm:
 4. priority order if there are multiple goals
 5. any constraints such as stack, architecture, time horizon, or preference for demo vs production quality
 
-### Interaction rule
+Interaction rules:
 
-If the user's goals are not yet explicit enough, **pause and ask** for them before finalizing `plan.md` and `feature_list.json`.
-
-Do not silently finalize a backlog based only on repository scanning when the actual development goal is unclear.
-
-### If the user already gave goals
-
-If the user already provided sufficiently clear goals in the current thread, do not ask redundant questions. Instead, briefly confirm the interpreted goals and proceed.
-
-### Communication rule during this step
-
-Use Chinese for questions, confirmations, summaries, and planning discussion unless the user explicitly asked for another language.
+- If the user's goals are not yet explicit enough, **pause and ask** for them before finalizing `plan.md` and `feature_list.json`.
+- Do **not** silently finalize a backlog based only on repository scanning when the actual development goal is unclear.
+- If the user already provided sufficiently clear goals in the current thread, do **not** ask redundant questions. Briefly confirm the interpreted goals and proceed.
+- Use Chinese for questions, confirmations, summaries, and planning discussion unless the user explicitly asked for another language.
 
 ---
 
-## Step 6: Create or update state.json
+## Step 5A: Choose Knowledge Mode
+
+Before finalizing durable state, choose the project knowledge sync depth.
+
+Supported modes:
+
+- `lite`: store a shallow project understanding summary with low maintenance cost
+- `standard`: store a broader reusable project understanding summary so later threads can avoid rereading large parts of the repository
+
+Rules:
+
+1. if the user explicitly chooses a mode, use it
+2. otherwise default to `lite`
+3. record the chosen mode in `state.json`
+4. keep the initialization pass concise; deeper topic files can be added later only when useful
+5. avoid setting expectations that every future thread must read every durable file in full before starting work
+
+---
+
+## Step 6: Create Or Update state.json
 
 Create or update `STATE_DIR/state.json`.
 
@@ -304,6 +303,11 @@ It must contain at least:
     "primary_plan_filename": "plan.md",
     "write_plan_output_pattern": "*_plan.md",
     "allow_in_repo_plan_files": false
+  },
+  "knowledge_mode": "lite | standard",
+  "knowledge_files": {
+    "knowledge_dir": "absolute path",
+    "overview_path": "absolute path"
   }
 }
 ```
@@ -315,18 +319,20 @@ Additional grounded fields may be added, such as:
 - `detected_frameworks`
 - `goal_summary`
 - `notes`
+- `top_level_structure_summary`
+- `key_paths`
 
 `default_user_language` should be set according to the user's actual preference in the thread. If the user is speaking Chinese and has not asked for another language, set it to `zh-CN`.
 
 ---
 
-## Step 7: Create or update plan.md
+## Step 7: Create Or Update plan.md
 
 Create or update `PLAN_PATH` as the durable planning document.
 
 This file must reflect both:
 
-- the observed repository/project state
+- the observed repository or project state
 - the user's confirmed development goals
 
 The document must also clearly identify:
@@ -351,17 +357,15 @@ If the project is empty, the plan should still be useful and should focus on sca
 
 Do not write vague filler.
 
-Additional planning artifacts created later by `write-plan` or `writing-plans` must be stored under `PLAN_DIR` using descriptive filenames ending with `_plan.md`.
+For later routine planning:
 
-When naming additional plan artifacts, prefer:
-
-- `<topic-slug>_plan.md` for a new topic-specific plan
-- reuse the existing topic file if the plan is a revision of the same topic
-- avoid generic names such as `new_plan.md`, `temp_plan.md`, or `plan2.md`
+- treat `plan.md` as the baseline initialization plan
+- create feature- or topic-specific planning in separate `PLAN_DIR/<feature-or-topic>_plan.md` files
+- do **not** modify an existing `plan.md` unless the user explicitly asks to revise it
 
 ---
 
-## Step 8: Create or update feature_list.json
+## Step 8: Create Or Update feature_list.json
 
 Create `STATE_DIR/feature_list.json` as the durable backlog.
 
@@ -370,7 +374,7 @@ This file must be a JSON array.
 It is not just a repo-scan todo list. It is the task backlog for future implementation cycles and must be grounded in:
 
 - the user's confirmed goals
-- the current repository/project state
+- the current repository or project state
 
 Each item should contain at least:
 
@@ -388,23 +392,58 @@ Each item should contain at least:
 }
 ```
 
-### Backlog rules
+Backlog rules:
 
-1. do not finalize the backlog before the user's goals are clear
+1. do **not** finalize the backlog before the user's goals are clear
 2. items must align with the confirmed phase-1 goal
 3. items must be reasonably sized for future one-feature-at-a-time execution
 4. if the project is empty, create sensible bootstrap tasks
-5. do not include implementation work that is explicitly out of scope
+5. do **not** include implementation work that is explicitly out of scope
 6. initial items should usually be `todo`
-7. do not mark anything `done` unless clearly justified by existing project state
+7. do **not** mark anything `done` unless clearly justified by existing project state
 
 If appropriate, begin with setup, architecture, scaffold, or interface-definition tasks before implementation tasks.
 
-Keep `feature_list.json` and `PLAN_PATH` aligned. If a later thread materially updates or finalizes `feature_list.json`, it should also update `~/.codex-state/<project-key>/plan/plan.md` in the same cycle when the plan changed.
+Keep `feature_list.json` aligned with the baseline plan.
 
 ---
 
-## Step 9: Create or update progress.md
+## Step 8A: Create Or Update project_knowledge/overview.md
+
+Create `STATE_DIR/project_knowledge/overview.md` as the durable project-understanding entrypoint.
+
+This file should capture understanding that is expensive to rediscover but stable enough to reuse across later threads.
+
+Required sections for all modes:
+
+1. project summary
+2. stack and tooling
+3. top-level structure
+4. entry points or starting paths if inferable
+5. important conventions
+6. important paths and resources
+7. common commands if inferable
+8. risks and unknowns
+
+For `standard` mode, also include when grounded:
+
+- module boundaries
+- key flows or core logic landmarks
+- config or environment landmarks
+- where to start reading for common task types
+
+Rules:
+
+1. prefer concise Markdown optimized for fast agent reading
+2. merge new understanding into `overview.md` when it fits existing headings
+3. do **not** duplicate the whole `plan.md`
+4. only create additional topic files later when the topic has clear long-term reuse value
+5. keep `overview.md` as an entrypoint summary rather than a full project encyclopedia
+6. if a section becomes long or topic-specific, replace detail with a short summary and move the detail into a dedicated topic file later
+
+---
+
+## Step 9: Create Or Update progress.md
 
 Create `STATE_DIR/progress.md` as the durable human-readable handoff log.
 
@@ -418,6 +457,7 @@ It must include:
 - what files were created or updated
 - a short summary of the confirmed goals
 - a short summary of the initial plan
+- whether `project_knowledge/overview.md` was created or updated
 - the recommended next feature
 - explicit note that future routine work should use `using-superpowers`
 - explicit note that future user-facing communication should default to Chinese unless the user requests otherwise
@@ -448,6 +488,7 @@ Default to Chinese for user-facing communication unless the user explicitly requ
 - state.json
 - ~/.codex-state/<project-key>/plan/plan.md
 - feature_list.json
+- ~/.codex-state/<project-key>/project_knowledge/overview.md
 - progress.md
 - AGENTS.md created or updated if needed
 - .gitignore created or updated if needed
@@ -461,24 +502,20 @@ Default to Chinese for user-facing communication unless the user explicitly requ
 
 ---
 
-## Step 10: Create or minimally update AGENTS.md in project root
+## Step 10: Create Or Minimally Update AGENTS.md In Project Root
 
 Create or update `PROJECT_ROOT/AGENTS.md`.
 
-### Important policy
-
 Because modifying project files can be sensitive, keep `AGENTS.md` as small and minimally invasive as possible.
 
-Prefer one of these strategies:
+Preferred strategies:
 
 1. if `AGENTS.md` does not exist, create a small bootstrap version
 2. if `AGENTS.md` exists, append a clearly delimited managed block instead of rewriting the whole file
 3. preserve all meaningful existing instructions
 4. avoid broad rewrites
 
-### Managed block requirement
-
-If updating an existing file, prefer a block like:
+Managed block requirement:
 
 ```md
 <!-- PROJECT-INIT WORKFLOW START -->
@@ -488,19 +525,20 @@ If updating an existing file, prefer a block like:
 
 If a managed block already exists, update only the contents of that block.
 
-### Required AGENTS.md behavior
-
 The resulting `AGENTS.md` must implement this logic:
 
-#### State A: Not initialized
+### State A: Not initialized
+
 If the persistent state directory, the project plan directory, the primary plan file, or required files under `~/.codex-state/<project-key>/` are missing or invalid, the agent should tell the user to run:
 
 `$project-init`
 
-#### State B: Initialized
+### State B: Initialized
+
 If the persistent state exists, future threads should first read:
 
 - `~/.codex-state/<project-key>/state.json`
+- `~/.codex-state/<project-key>/project_knowledge/overview.md`
 - `~/.codex-state/<project-key>/plan/plan.md`
 - `~/.codex-state/<project-key>/feature_list.json`
 - `~/.codex-state/<project-key>/progress.md`
@@ -513,55 +551,53 @@ Then for routine implementation work:
 4. verify before marking done
 5. update `feature_list.json`
 6. treat `~/.codex-state/<project-key>/plan/` as the required destination for all plan artifacts
-7. if `using-superpowers`, `writing-plans`, `write-plan`, or any other planning workflow is invoked, write the primary durable plan to `~/.codex-state/<project-key>/plan/plan.md`
-8. when `write-plan` or `writing-plans` creates a new plan artifact, write it inside `~/.codex-state/<project-key>/plan/` using a descriptive filename ending in `_plan.md`
-9. do not create or update plan files inside the repository such as `docs/superpowers/plans/` unless the user explicitly asks for an in-repo plan file
-10. update `~/.codex-state/<project-key>/plan/plan.md` whenever the planned execution order, scope, or backlog framing changed
-11. append to `progress.md`
-12. keep the repo runnable and reviewable
+7. when `using-superpowers`, `write-plan`, `writing-plans`, or any other planning workflow is invoked for a current feature, create or update a separate `*_plan.md` file under `PLAN_DIR` rather than rewriting an existing `plan.md`
+8. when the active feature can be identified from `feature_list.json`, prefer naming the new plan file from that feature's id or title slug
+9. when continuing the same feature or topic, reuse the existing matching `*_plan.md`
+10. do **not** create or update plan files inside the repository such as `docs/superpowers/plans/` unless the user explicitly asks for an in-repo plan file
+11. do **not** modify an existing `~/.codex-state/<project-key>/plan/plan.md` unless the user explicitly asks to revise it
+12. update `project_knowledge/overview.md` when the current thread learns durable project understanding that future threads are likely to reuse
+13. append to `progress.md`
+14. keep the repo runnable and reviewable
 
-#### General rules
-The AGENTS guidance should also say:
+General rules:
 
 - default to Chinese for user-facing communication unless the user explicitly requests another language
-- do not use `project-init` for routine implementation
-- during the first initialization thread, do not modify arbitrary project files
+- do **not** use `project-init` for routine implementation
+- during the first initialization thread, do **not** modify arbitrary project files
 - prefer durable state over thread memory
-- treat the project-scoped plan directory as a user/project preference that overrides superpowers default plan locations
+- prefer `project_knowledge/overview.md` before rescanning large parts of the repository
+- do **not** require later threads to read every durable file in full when a smaller targeted read is enough
+- treat the project-scoped plan directory as a user or project preference that overrides superpowers default plan locations
 - if a planning skill would normally write to an in-repo path, redirect it to `~/.codex-state/<project-key>/plan/` instead
 - when a planning skill creates a new plan file, prefer descriptive filenames ending in `_plan.md`
+- if later threads learn reusable framework, convention, path, or logic knowledge, merge it into `project_knowledge/overview.md` when possible and create a topic file only when clearly more maintainable
 - if repository state and persistent state conflict, call it out explicitly
 - preserve existing project instructions over generated guidance when they conflict
 
-### Recommended AGENTS.md style
-
-Prefer a **small bootstrap AGENTS.md** that points future threads to the state files, rather than a giant policy document.
+Prefer a small bootstrap `AGENTS.md` that points future threads to the state files, rather than a giant policy document.
 
 ---
 
-## Step 11: Create or update .gitignore when appropriate
+## Step 11: Create Or Update .gitignore When Appropriate
 
 If `IS_GIT_REPO` is true, inspect `.gitignore`.
 
-Goal: keep local-only workflow guidance out of version control when appropriate.
-
-### Required behavior
+Required behavior:
 
 1. Ensure that `AGENTS.md` is ignored by git **unless** the user explicitly asked to keep it tracked.
 2. If `.gitignore` does not exist, create it with a minimal addition for `AGENTS.md`.
 3. If `.gitignore` exists, add `AGENTS.md` only if it is not already effectively ignored.
 4. Keep the update minimal and avoid reformatting unrelated content.
-5. Do not add broad ignore rules unless explicitly requested.
+5. Do **not** add broad ignore rules unless explicitly requested.
 
-### Notes
+This step only updates `.gitignore`. It does **not** run git commands.
 
-- This step only updates `.gitignore`. It does not run git commands.
-- If `AGENTS.md` was already tracked by git, mention clearly in the final report that `.gitignore` alone will not untrack it and the user may need to run `git rm --cached AGENTS.md` manually.
-- Do not automatically modify other ignore rules unless the user asked.
+If `AGENTS.md` was already tracked by git, mention clearly in the final report that `.gitignore` alone will not untrack it and the user may need to run `git rm --cached AGENTS.md` manually.
 
 ---
 
-## Step 12: Final validation
+## Step 12: Final Validation
 
 Before finishing, check that:
 
@@ -571,6 +607,7 @@ Before finishing, check that:
 - `state.json` is internally consistent
 - `feature_list.json` is valid JSON
 - `~/.codex-state/<project-key>/plan/plan.md` reflects the confirmed goals
+- `~/.codex-state/<project-key>/project_knowledge/overview.md` exists and matches the chosen `knowledge_mode`
 - `~/.codex-state/<project-key>/plan/plan.md` clearly identifies the correct `project-key` or project root for the current project
 - `AGENTS.md` exists in the project root
 - `AGENTS.md` references the correct `project-key`
@@ -578,7 +615,8 @@ Before finishing, check that:
 - `AGENTS.md` routes missing-state situations to `$project-init`
 - `AGENTS.md` encodes the default-Chinese communication rule
 - `AGENTS.md` explicitly overrides in-repo superpowers plan destinations in favor of `~/.codex-state/<project-key>/plan/`
-- `AGENTS.md` requires new write-plan artifacts to use filenames ending in `_plan.md`
+- `AGENTS.md` requires new plan artifacts to use filenames ending in `_plan.md`
+- `AGENTS.md` keeps existing `plan.md` unchanged unless the user explicitly requests revision
 - `.gitignore` exists or was updated appropriately when the project is a git repo
 - no non-initialization project files were modified unless explicitly requested
 
@@ -586,13 +624,13 @@ If something could not be created, say so clearly.
 
 ---
 
-## Empty-project compatibility
+## Empty-Project Compatibility
 
 This skill must work for an empty or near-empty project folder.
 
 If the project is empty:
 
-- do not pretend there is existing architecture
+- do **not** pretend there is existing architecture
 - explicitly record that the repository is empty
 - ask the user for the intended project goal
 - write a plan suitable for a greenfield project
@@ -604,29 +642,19 @@ If the project is empty:
 
 ---
 
-## Expected file formats
+## Expected File Formats
 
-### state.json
-Machine-readable durable state. Must be valid JSON.
-
-### feature_list.json
-Machine-readable durable backlog. Must be valid JSON array and must reflect confirmed goals.
-
-### progress.md
-Human-readable durable handoff log.
-
-### plan.md
-Human-readable durable strategy and planning note stored at `~/.codex-state/<project-key>/plan/plan.md`.
-
-### AGENTS.md
-Project-root bootstrap workflow guidance. Keep it minimal and minimally invasive.
-
-### .gitignore
-Minimal ignore rules update. Keep it small and do not disturb unrelated entries.
+- `state.json`: machine-readable durable state, valid JSON
+- `feature_list.json`: machine-readable durable backlog, valid JSON array
+- `progress.md`: human-readable durable handoff log
+- `plan.md`: human-readable durable baseline strategy note stored at `~/.codex-state/<project-key>/plan/plan.md`
+- `project_knowledge/overview.md`: human-readable durable project-understanding entrypoint
+- `AGENTS.md`: project-root bootstrap workflow guidance
+- `.gitignore`: minimal ignore-rules update
 
 ---
 
-## Required final report to the user
+## Required Final Report To The User
 
 At the end of initialization, report in Chinese by default unless the user explicitly requested another language.
 
@@ -637,43 +665,54 @@ The report must include:
 3. created state directory
 4. created project plan directory and primary plan path
 5. whether the project appears empty or non-empty
-6. which files were created or updated
-7. whether AGENTS.md was created or minimally updated
-8. whether `.gitignore` was created or updated
-9. concise summary of confirmed goals
-10. concise summary of the initial plan
-11. the initial recommended next feature
-12. any conflicts, uncertainties, preserved existing instructions, or git-tracking caveats
+6. chosen `knowledge_mode`
+7. which files were created or updated
+8. whether `AGENTS.md` was created or minimally updated
+9. whether `.gitignore` was created or updated
+10. concise summary of confirmed goals
+11. concise summary of the initial plan
+12. the initial recommended next feature
+13. any conflicts, uncertainties, preserved existing instructions, or git-tracking caveats
 
 Keep the report specific and concise.
 
 ---
 
-## Normal-work handoff rule
+## Normal-Work Handoff Rule
 
 After initialization is complete, future routine implementation should not use this skill.
 
 Future routine work should:
 
-1. read `~/.codex-state/<project-key>/state.json`, `~/.codex-state/<project-key>/plan/plan.md`, `~/.codex-state/<project-key>/feature_list.json`, and `~/.codex-state/<project-key>/progress.md`
+1. read `~/.codex-state/<project-key>/state.json`, `~/.codex-state/<project-key>/project_knowledge/overview.md`, `~/.codex-state/<project-key>/plan/plan.md`, `~/.codex-state/<project-key>/feature_list.json`, and `~/.codex-state/<project-key>/progress.md`
 2. use `using-superpowers`
 3. work one feature at a time
-4. update durable state after each cycle, including `~/.codex-state/<project-key>/plan/plan.md` whenever the plan changes
-5. write additional planning artifacts produced by `write-plan` or `writing-plans` under `~/.codex-state/<project-key>/plan/` using descriptive filenames ending in `_plan.md`
-6. communicate with the user in Chinese by default unless the user explicitly requests another language
+4. update durable state after each cycle
+5. update `project_knowledge/overview.md` when durable project understanding changes or becomes clearer
+6. when planning is needed for a feature, create or update a separate `*_plan.md` under `~/.codex-state/<project-key>/plan/`, preferably named from the active feature in `feature_list.json`
+7. leave an existing `plan.md` unchanged unless the user explicitly asks to revise it
+8. communicate with the user in Chinese by default unless the user explicitly requests another language
+
+Reading guidance for later threads:
+
+- start with `state.json` and `project_knowledge/overview.md`
+- read `plan.md` selectively for baseline goals, strategy, or risks rather than by default reading the whole file line by line
+- read `feature_list.json` selectively to identify the current active or next relevant feature
+- read only the most recent relevant section of `progress.md` unless older history is needed
+- if topic files are added under `project_knowledge/`, read only the files relevant to the current task
 
 This boundary is strict.
 
 ---
 
-## Quality standard
+## Quality Standard
 
 Be concrete.
 Be minimally destructive.
 Ask for goals before finalizing backlog if they are not already clear.
 Support empty projects honestly.
 Preserve existing project guidance where possible.
-Prefer a small bootstrap AGENTS.md over a large intrusive rewrite.
+Prefer a small bootstrap `AGENTS.md` over a large intrusive rewrite.
 Do not hallucinate repository details.
 Do not modify source files during initialization.
 Prefer Chinese for user-facing workflow by default unless the user explicitly requests another language.
