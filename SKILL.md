@@ -3,7 +3,7 @@ name: project-init
 description: Use this skill only for first-time initialization of a software project. It creates persistent project state under ~/.codex-state/<project-key>/, stores the durable primary planning document at ~/.codex-state/<project-key>/plan/plan.md, requires later write-plan or writing-plans outputs to be written under ~/.codex-state/<project-key>/plan/ as feature- or topic-specific *_plan.md files instead of inside the repository, gathers the user's intended development goals before finalizing plan.md and feature_list.json, prefers Chinese for user-facing outputs unless the user explicitly requests another language, and creates or updates only the minimum required initialization files. It should also ensure AGENTS.md is git-ignored when appropriate. Do not use this skill for normal implementation work or routine bugfixes. After initialization, routine development should read the persistent state and use using-superpowers for one-feature-at-a-time execution.
 ---
 
-# Project Init v5.2
+# Project Init v5.3
 
 ## Purpose
 
