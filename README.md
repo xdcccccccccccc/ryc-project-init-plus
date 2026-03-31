@@ -1,22 +1,22 @@
 # ryc-project-init-plus
 
-`ryc-project-init-plus` is a multi-skill workflow collection for long-running project collaboration in Codex or Claude Code.
+`ryc-project-init-plus` 是一个面向 Codex 或 Claude Code 长周期协作的多 skill 工作流集合。
 
-It keeps the familiar first-time initialization experience of the old `project-init` workflow, but splits later work into clearer roles so new threads read less context and update state more safely.
+它保留了旧版 `project-init` 在“首次初始化”上的熟悉体验，同时把后续工作拆成更清晰的角色，让新线程减少无关上下文读取，并更安全地更新项目状态。
 
 ## Skills
 
-- `ryc-project-workflow-router`: default entry when the role is unclear
-- `ryc-project-init`: first-time project initialization and bootstrap
-- `ryc-project-developer`: normal implementation workflow for one task at a time
-- `ryc-project-reviewer`: module review, logic analysis, and risk inspection
-- `ryc-project-planner`: replanning, backlog reshaping, and next-step discussion
+- `ryc-project-workflow-router`：当角色不明确时的默认入口
+- `ryc-project-init`：首次项目初始化与工作流引导
+- `ryc-project-developer`：日常实现角色，默认一次只做一个任务
+- `ryc-project-reviewer`：模块审查、逻辑分析与风险检查
+- `ryc-project-planner`：方案重设、backlog 调整与下一步方向讨论
 
-`skills/shared/` is a shared reference folder. It is not a skill and should not be invoked directly.
+`skills/shared/` 是共享参考目录，不是 skill，不应被直接调用。
 
 ## Install
 
-This project is installed the same way as `superpowers`: mount the repository's `skills/` directory into `~/.agents/skills/`.
+这个项目的安装方式和 `superpowers` 一样：把仓库中的 `skills/` 目录挂载到 `~/.agents/skills/` 下。
 
 ```bash
 git clone <your-repo-url> ~/.codex/ryc-project-init-plus
@@ -24,17 +24,17 @@ mkdir -p ~/.agents/skills
 ln -s ~/.codex/ryc-project-init-plus/skills ~/.agents/skills/ryc-project-init-plus
 ```
 
-This works because Codex discovers each nested `SKILL.md` under the mounted `skills/` directory, just like it does for `superpowers`.
+之所以这样可行，是因为 Codex 会像处理 `superpowers` 一样，在挂载后的 `skills/` 目录下发现各个子 skill 的 `SKILL.md`。
 
 ## Use
 
-If the role is unclear, start with:
+如果当前线程的角色不明确，可以先用：
 
 ```text
 $ryc-project-workflow-router
 ```
 
-If the role is already clear, invoke the role skill directly:
+如果角色已经明确，可以直接调用对应的 role skill：
 
 ```text
 $ryc-project-init
@@ -43,18 +43,18 @@ $ryc-project-reviewer
 $ryc-project-planner
 ```
 
-Recommended usage:
+推荐用法：
 
-- first-time bootstrap: `ryc-project-init`
-- routine feature delivery: `ryc-project-developer`
-- logic review or code scrutiny: `ryc-project-reviewer`
-- backlog or direction changes: `ryc-project-planner`
+- 第一次初始化项目：`ryc-project-init`
+- 日常功能开发与任务推进：`ryc-project-developer`
+- 逻辑审查或代码细查：`ryc-project-reviewer`
+- backlog 或方案方向调整：`ryc-project-planner`
 
 ## State Files
 
-This workflow centers around durable state under `~/.codex-state/<project-key>/`.
+这套工作流围绕 `~/.codex-state/<project-key>/` 下的持久化状态展开。
 
-Core files:
+核心状态文件包括：
 
 - `state.json`
 - `feature_list.json`
@@ -64,14 +64,14 @@ Core files:
 - `project_knowledge/overview.md`
 - `project_knowledge/*.md`
 
-If a project also has `program.md`, it is treated as an intent document for goals, scope, and direction. It is not duplicated into `project_knowledge`.
+如果项目本身还存在 `program.md`，则把它视为目标、范围和方向层的意图文档，不应把这些内容重复写进 `project_knowledge`。
 
 ## Design Notes
 
-- `ryc-project-init` still writes `AGENTS.md` and bootstraps the project state
-- later roles learn the state layout and constraints from `AGENTS.md`, but are not trapped in a binary state machine
-- `ryc-project-developer` defaults to exactly one task unless the user explicitly allows more
-- `project_knowledge` is for reusable execution knowledge, not roadmap or phase planning
+- `ryc-project-init` 仍然负责写入 `AGENTS.md` 并完成项目状态初始化
+- 后续角色会从 `AGENTS.md` 了解状态文件与约束，但不会被限制在一个简单的二元状态机里
+- `ryc-project-developer` 默认一次只完成一个任务，除非用户明确允许更多
+- `project_knowledge` 用来承载可复用的执行认知，而不是 roadmap 或阶段计划
 
 ## Layout
 
