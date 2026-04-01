@@ -16,19 +16,75 @@
 
 ## Install
 
-这个项目当前只提供 Codex 的安装方式。
+推荐先把仓库克隆到一个固定位置，再用软链安装到 Codex 或 Claude Code。
+
+推荐克隆位置：
+
+```bash
+git clone https://github.com/xdcccccccccccc/ryc-project-init-plus.git ~/.codex/ryc-project-init-plus
+```
 
 Codex:
 
 ```bash
-git clone https://github.com/xdcccccccccccc/ryc-project-init-plus.git ~/.codex/ryc-project-init-plus
-mkdir -p ~/.agents/skills
-ln -s ~/.codex/ryc-project-init-plus/skills ~/.agents/skills/ryc-project-init-plus
+bash ~/.codex/ryc-project-init-plus/scripts/install-codex.sh
 ```
 
 这样安装后，Codex 会像处理 `superpowers` 一样，在挂载后的集合目录下发现各个子 skill 的 `SKILL.md`。
 
-Claude Code 的安装方式暂未在本仓库中提供；后续如果要支持，应补齐 Claude 插件目录和元数据，再单独设计安装说明。
+Claude Code:
+
+```bash
+bash ~/.codex/ryc-project-init-plus/scripts/install-claude.sh
+```
+
+Claude Code 使用的是官方 personal skills 目录 `~/.claude/skills/`。安装脚本会把每个角色 skill 单独软链到这个目录下，因此安装完成后可以直接在 Claude Code 对话框输入：
+
+```text
+/ryc-project-init
+/ryc-project-developer
+/ryc-project-reviewer
+/ryc-project-planner
+/ryc-project-workflow-router
+```
+
+脚本还会一并链接 `shared/`，因为当前 skill 集合通过 `../shared/*.md` 读取共享参考文件。
+
+## Update
+
+如果 Codex 和 Claude Code 都是从同一个 clone 安装的，后续更新只需要：
+
+```bash
+cd ~/.codex/ryc-project-init-plus
+git pull
+```
+
+因为两个系统内的 skill 都是软链到这一个仓库，所以不需要重复复制文件。
+
+如果你调整了安装路径，再重新运行对应安装脚本即可。
+
+## Verify
+
+Codex:
+
+```bash
+ls -la ~/.agents/skills/ryc-project-init-plus
+```
+
+Claude Code:
+
+```bash
+ls -la ~/.claude/skills/ryc-project-init
+ls -la ~/.claude/skills/shared
+```
+
+然后重启 Claude Code，新开一个会话，直接输入：
+
+```text
+/ryc-project-init
+```
+
+如果命令能出现并执行，对应 skill 就已经被 Claude Code 识别了。
 
 ## Use
 
@@ -97,4 +153,9 @@ skills/
     knowledge-writing-rules.md
     plan-writing-rules.md
     progress-writing-rules.md
+scripts/
+  install-codex.sh
+  uninstall-codex.sh
+  install-claude.sh
+  uninstall-claude.sh
 ```

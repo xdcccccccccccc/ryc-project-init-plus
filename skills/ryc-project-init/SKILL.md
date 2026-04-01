@@ -1,6 +1,6 @@
 ---
 name: ryc-project-init
-description: Use when the user explicitly wants to initialize a project for the first serious Codex workflow, or explicitly agrees to initialize after durable state is found missing or incomplete
+description: Use when the user explicitly wants to initialize a project for the first serious Codex or Claude Code workflow, or explicitly agrees to initialize after durable state is found missing or incomplete
 ---
 
 # ryc-project-init
