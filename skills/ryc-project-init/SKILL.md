@@ -9,13 +9,13 @@ description: Use when the user explicitly wants to initialize a project for the 
 
 This skill is for first-time project initialization only.
 
-Its job is to create durable project state under `~/.codex-state/<project-key>/`, write the baseline planning and knowledge files, and create a small `AGENTS.md` bootstrap so later threads can select the right role without rereading the whole repository.
+Its job is to create durable project state under `~/.codex-state/<project-key>/`, write the baseline planning and knowledge files, and create small workspace bootstrap docs such as `AGENTS.md` and `CLAUDE.md` so later threads can select the right role without rereading the whole repository.
 
 This skill should feel similar to the old `project-init` workflow:
 
 - initialize once
 - create durable state
-- write `AGENTS.md`
+- write `AGENTS.md` and `CLAUDE.md`
 - keep project-root edits minimal
 - do not turn initialization into feature development
 
@@ -37,6 +37,7 @@ Allowed modifications:
 
 - files under `~/.codex-state/<project-key>/`
 - `PROJECT_ROOT/AGENTS.md`
+- `PROJECT_ROOT/CLAUDE.md`
 - `PROJECT_ROOT/.gitignore`
 - repo-local skill files only if the user explicitly asked for them
 
@@ -54,7 +55,7 @@ unless the user explicitly asks.
 
 Set the workflow so user-facing communication defaults to Chinese unless the user explicitly requests another language.
 
-The generated `AGENTS.md` must encode this.
+The generated bootstrap docs must encode this.
 
 ## When To Use
 
@@ -85,7 +86,7 @@ Do not use when:
 9. write `feature_list.json`
 10. write `project_knowledge/overview.md`
 11. write or update `progress.md`
-12. create or minimally update `AGENTS.md`
+12. create or minimally update `AGENTS.md` and `CLAUDE.md`
 13. create or minimally update `.gitignore` when needed
 14. validate outputs and report results
 
@@ -143,6 +144,7 @@ Inspect at minimum:
 - CI/workflow files if present
 - framework or language indicators
 - existing `AGENTS.md`
+- existing `CLAUDE.md`
 - existing `.gitignore`
 
 Build a grounded understanding of:
@@ -325,9 +327,9 @@ The initialization entry must include:
 
 Append if `progress.md` already exists. Do not delete history.
 
-## Step 10: Create Or Update AGENTS.md
+## Step 10: Create Or Update AGENTS.md And CLAUDE.md
 
-Create or minimally update `PROJECT_ROOT/AGENTS.md`.
+Create or minimally update `PROJECT_ROOT/AGENTS.md` and `PROJECT_ROOT/CLAUDE.md`.
 
 Preferred strategy:
 
@@ -359,15 +361,17 @@ This block must:
 
 Do not encode only a binary initialized or not-initialized state machine. Encode role-aware guidance with minimal reads and clear role boundaries.
 
+Use the same managed guidance in both files unless the user explicitly wants different platform-specific wording.
+
 ## Step 11: Update .gitignore When Appropriate
 
 If this is a git repository:
 
-1. ensure `AGENTS.md` is ignored unless the user explicitly wants it tracked
+1. ensure `AGENTS.md` and `CLAUDE.md` are ignored unless the user explicitly wants them tracked
 2. create `.gitignore` if needed
 3. keep the change minimal
 
-If `AGENTS.md` is already tracked, mention that `.gitignore` alone does not untrack it.
+If `AGENTS.md` or `CLAUDE.md` is already tracked, mention that `.gitignore` alone does not untrack it.
 
 ## Step 12: Final Validation
 
@@ -379,7 +383,7 @@ Before finishing, check that:
 - `feature_list.json` is valid JSON
 - `plan/plan.md` reflects the confirmed goals
 - `project_knowledge/overview.md` exists and matches the chosen `knowledge_mode`
-- `AGENTS.md` points future threads to the correct skills and state files
+- `AGENTS.md` and `CLAUDE.md` point future threads to the correct skills and state files
 - `.gitignore` was updated correctly when needed
 - no non-initialization project files were modified unless explicitly requested
 
@@ -407,7 +411,7 @@ Include:
 5. whether the project appears empty or non-empty
 6. chosen `knowledge_mode`
 7. which files were created or updated
-8. whether `AGENTS.md` was created or minimally updated
+8. whether `AGENTS.md` and `CLAUDE.md` were created or minimally updated
 9. whether `.gitignore` was created or updated
 10. concise summary of confirmed goals
 11. concise summary of the initial plan

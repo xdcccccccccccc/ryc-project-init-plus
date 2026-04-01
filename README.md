@@ -16,15 +16,25 @@
 
 ## Install
 
-这个项目的安装方式和 `superpowers` 一样：把仓库中的 `skills/` 目录挂载到 `~/.agents/skills/` 下。
+这个项目的安装方式和 `superpowers` 一样：把仓库中的 `skills/` 目录挂载到对应 agent 的 skills 目录下。
+
+Codex:
 
 ```bash
-git clone <your-repo-url> ~/.codex/ryc-project-init-plus
+git clone https://github.com/xdcccccccccccc/ryc-project-init-plus.git ~/.codex/ryc-project-init-plus
 mkdir -p ~/.agents/skills
 ln -s ~/.codex/ryc-project-init-plus/skills ~/.agents/skills/ryc-project-init-plus
 ```
 
-之所以这样可行，是因为 Codex 会像处理 `superpowers` 一样，在挂载后的 `skills/` 目录下发现各个子 skill 的 `SKILL.md`。
+Claude Code:
+
+```bash
+git clone https://github.com/xdcccccccccccc/ryc-project-init-plus.git ~/.codex/ryc-project-init-plus
+mkdir -p ~/.claude/skills
+ln -s ~/.codex/ryc-project-init-plus/skills ~/.claude/skills/ryc-project-init-plus
+```
+
+这样安装后，Codex 或 Claude Code 都会在挂载后的 `skills/` 目录下发现各个子 skill 的 `SKILL.md`。
 
 ## Use
 
@@ -68,8 +78,8 @@ $ryc-project-planner
 
 ## Design Notes
 
-- `ryc-project-init` 仍然负责写入 `AGENTS.md` 并完成项目状态初始化
-- 后续角色会从 `AGENTS.md` 了解状态文件与约束，但不会被限制在一个简单的二元状态机里
+- `ryc-project-init` 仍然负责写入 `AGENTS.md`、`CLAUDE.md` 并完成项目状态初始化
+- 后续角色会从这些引导文件了解状态文件与约束，但不会被限制在一个简单的二元状态机里
 - `ryc-project-developer` 默认一次只完成一个任务，除非用户明确允许更多
 - `project_knowledge` 用来承载可复用的执行认知，而不是 roadmap 或阶段计划
 
