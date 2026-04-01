@@ -16,7 +16,7 @@
 
 ## Install
 
-这个项目的安装方式和 `superpowers` 一样：把仓库中的 `skills/` 目录挂载到对应 agent 的 skills 目录下。
+这个项目当前只提供 Codex 的安装方式。
 
 Codex:
 
@@ -26,15 +26,9 @@ mkdir -p ~/.agents/skills
 ln -s ~/.codex/ryc-project-init-plus/skills ~/.agents/skills/ryc-project-init-plus
 ```
 
-Claude Code:
+这样安装后，Codex 会像处理 `superpowers` 一样，在挂载后的集合目录下发现各个子 skill 的 `SKILL.md`。
 
-```bash
-git clone https://github.com/xdcccccccccccc/ryc-project-init-plus.git ~/.codex/ryc-project-init-plus
-mkdir -p ~/.claude/skills
-ln -s ~/.codex/ryc-project-init-plus/skills ~/.claude/skills/ryc-project-init-plus
-```
-
-这样安装后，Codex 或 Claude Code 都会在挂载后的 `skills/` 目录下发现各个子 skill 的 `SKILL.md`。
+Claude Code 的安装方式暂未在本仓库中提供；后续如果要支持，应补齐 Claude 插件目录和元数据，再单独设计安装说明。
 
 ## Use
 
