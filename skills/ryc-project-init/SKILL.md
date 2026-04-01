@@ -1,6 +1,6 @@
 ---
 name: ryc-project-init
-description: Use when a project is being initialized for the first serious Codex workflow and durable state is missing or incomplete
+description: Use when the user explicitly wants to initialize a project for the first serious Codex workflow, or explicitly agrees to initialize after durable state is found missing or incomplete
 ---
 
 # ryc-project-init
@@ -109,8 +109,10 @@ Derive a stable `PROJECT_KEY` from `PROJECT_ROOT`:
 - lowercase
 - spaces and underscores become `-`
 - remove unsupported characters
+- default to the normalized project directory name
+- only add a suffix if that base key would collide with another project
 - never use a random suffix
-- if extra stability is needed, use a deterministic suffix from the absolute path
+- when a suffix is needed, use a short deterministic suffix from the absolute path
 
 ## Step 3: Create Persistent State Directory
 
