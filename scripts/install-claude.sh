@@ -8,6 +8,7 @@ TARGET_DIR="$HOME/.claude/skills"
 mkdir -p "$TARGET_DIR"
 
 for dir in \
+  hyper-cast-off \
   ryc-project-workflow-router \
   ryc-project-init \
   ryc-project-developer \
@@ -21,4 +22,4 @@ done
 
 echo "Claude Code install complete:"
 echo "  skills linked into $TARGET_DIR"
-echo "Restart Claude Code, then try /ryc-project-init or /ryc-project-workflow-router"
+echo "Restart Claude Code, then try /hyper-cast-off or /ryc-project-init"

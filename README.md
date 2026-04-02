@@ -6,6 +6,7 @@
 
 ## Skills
 
+- `hyper-cast-off`：手动触发的状态蒸馏角色，用于压缩 `.codex-state` 中的冗余信息
 - `ryc-project-workflow-router`：当角色不明确时的默认入口
 - `ryc-project-init`：首次项目初始化与工作流引导
 - `ryc-project-developer`：日常实现角色，默认一次只做一个任务
@@ -41,6 +42,7 @@ bash ~/.codex/ryc-project-init-plus/scripts/install-claude.sh
 Claude Code 使用的是官方 personal skills 目录 `~/.claude/skills/`。安装脚本会把每个角色 skill 单独软链到这个目录下，因此安装完成后可以直接在 Claude Code 对话框输入：
 
 ```text
+/hyper-cast-off
 /ryc-project-init
 /ryc-project-developer
 /ryc-project-reviewer
@@ -74,6 +76,7 @@ ls -la ~/.agents/skills/ryc-project-init-plus
 Claude Code:
 
 ```bash
+ls -la ~/.claude/skills/hyper-cast-off
 ls -la ~/.claude/skills/ryc-project-init
 ls -la ~/.claude/skills/shared
 ```
@@ -81,7 +84,7 @@ ls -la ~/.claude/skills/shared
 然后重启 Claude Code，新开一个会话，直接输入：
 
 ```text
-/ryc-project-init
+/hyper-cast-off
 ```
 
 如果命令能出现并执行，对应 skill 就已经被 Claude Code 识别了。
@@ -97,6 +100,7 @@ $ryc-project-workflow-router
 如果角色已经明确，可以直接调用对应的 role skill：
 
 ```text
+$hyper-cast-off
 $ryc-project-init
 $ryc-project-developer
 $ryc-project-reviewer
@@ -105,6 +109,7 @@ $ryc-project-planner
 
 推荐用法：
 
+- 手动蒸馏 `.codex-state`：`hyper-cast-off`
 - 第一次初始化项目：`ryc-project-init`
 - 日常功能开发与任务推进：`ryc-project-developer`
 - 逻辑审查或代码细查：`ryc-project-reviewer`
@@ -137,6 +142,8 @@ $ryc-project-planner
 
 ```text
 skills/
+  hyper-cast-off/
+    SKILL.md
   ryc-project-workflow-router/
     SKILL.md
   ryc-project-init/

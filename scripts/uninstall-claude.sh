@@ -4,6 +4,7 @@ set -euo pipefail
 TARGET_DIR="$HOME/.claude/skills"
 
 for dir in \
+  hyper-cast-off \
   ryc-project-workflow-router \
   ryc-project-init \
   ryc-project-developer \
