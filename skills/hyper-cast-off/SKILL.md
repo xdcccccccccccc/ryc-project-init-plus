@@ -74,6 +74,12 @@ This skill must not modify:
 - `feature_list.json`: keep active and near-term work clear; archive stale completed detail if needed
 - `plan/`: keep current direction and active plans; archive superseded plans instead of silently dropping them
 
+## `project_knowledge` Safeguards
+
+- before tightening `project_knowledge`, read `overview.md` and any active topic files it points to
+- default to tightening `progress.md` and stale plan detail before making broad `project_knowledge` changes
+- do not delete a topic file unless it is clearly duplicated, obsolete, or replaced by a better-focused file
+
 ## Archive Rule
 
 If distillation would remove substantial historical detail, create:
